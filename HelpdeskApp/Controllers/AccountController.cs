@@ -22,7 +22,6 @@ namespace HelpdeskApp.Controllers
 
         // POST: /Account/Login
         [HttpPost]
-        [HttpPost]
         public IActionResult Login(UserModel model)
         {
             var user = _context.Users.FirstOrDefault(u => u.Username == model.Username && u.Password == model.Password);
@@ -32,7 +31,7 @@ namespace HelpdeskApp.Controllers
                 HttpContext.Session.SetString("UserId", user.Id.ToString());
                 HttpContext.Session.SetString("Username", user.Username);
 
-                return RedirectToAction("Index", "Home"); 
+                return RedirectToAction("Index", "Ticket"); 
             }
             else
             {
@@ -40,6 +39,7 @@ namespace HelpdeskApp.Controllers
                 return View();
             }
         }
+
 
         // GET: /Account/Register
         [HttpGet]

@@ -7,7 +7,16 @@ using HelpdeskApp.Data;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddAuthentication("Cookies")
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Account/Login";  // Œcie¿ka logowania
+        options.AccessDeniedPath = "/Account/AccessDenied";  // Œcie¿ka, gdy u¿ytkownik nie ma dostêpu
+    });
 
+builder.Services.AddAuthorization();
+
+builder.Services.AddControllersWithViews();
 // Dodaj us³ugi, takie jak MVC
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -21,6 +30,8 @@ builder.Services.AddSession(options =>
 });
 
 var app = builder.Build();
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseSession();
 
 // Skonfiguruj middleware aplikacji
@@ -41,6 +52,6 @@ app.UseRouting();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Ticket}/{action=Index}/{id?}");
 
 app.Run();
