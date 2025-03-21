@@ -22,13 +22,17 @@ namespace HelpdeskApp.Controllers
 
         // POST: /Account/Login
         [HttpPost]
+        [HttpPost]
         public IActionResult Login(UserModel model)
         {
             var user = _context.Users.FirstOrDefault(u => u.Username == model.Username && u.Password == model.Password);
 
             if (user != null)
             {
-                return RedirectToAction("Index", "Home");
+                HttpContext.Session.SetString("UserId", user.Id.ToString());
+                HttpContext.Session.SetString("Username", user.Username);
+
+                return RedirectToAction("Index", "Home"); 
             }
             else
             {
@@ -50,22 +54,26 @@ namespace HelpdeskApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Sprawdzenie, czy użytkownik o takiej nazwie już istnieje
                 if (_context.Users.Any(u => u.Username == user.Username))
                 {
                     ModelState.AddModelError("Username", "Użytkownik o tej nazwie już istnieje.");
                     return View(user);
                 }
 
-                // Dodanie użytkownika do bazy danych
                 _context.Users.Add(user);
                 _context.SaveChanges();
 
-                // Przekierowanie po udanej rejestracji
                 return RedirectToAction("Login");
             }
 
             return View(user);
         }
+
+        public IActionResult Logout()
+        {
+            HttpContext.Session.Clear();
+            return RedirectToAction("Login", "Account");
+        }
+
     }
 }
