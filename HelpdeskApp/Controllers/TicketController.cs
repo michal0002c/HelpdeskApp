@@ -43,12 +43,48 @@ namespace HelpdeskApp.Controllers
         [HttpPost]
         public IActionResult Create(Ticket ticket)
         {
-            if (ModelState.IsValid)
+            if (!IsUserLoggedIn())
             {
-                _context.Tickets.Add(ticket);
-                _context.SaveChanges();
-                return RedirectToAction("Index");
+                return RedirectToAction("Login", "Account");
             }
+
+            ticket.Username = HttpContext.Session.GetString("Username");
+
+            Console.WriteLine($"Session Username: {ticket.Username}");
+
+            if (!ModelState.IsValid) 
+            {
+                Console.WriteLine("Errors:");
+
+                foreach (var key in ModelState.Keys)
+                {
+                    foreach (var error in ModelState[key].Errors)
+                    {
+                        Console.WriteLine($"Pole: {key}, Błąd: {error.ErrorMessage}");
+                    }
+                }
+
+                return View(ticket);
+            }
+
+            _context.Tickets.Add(ticket);
+            _context.SaveChanges();
+            return RedirectToAction("Index");
+        }
+
+        public IActionResult Details(int id)
+        {
+            if (!IsUserLoggedIn())
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var ticket = _context.Tickets.FirstOrDefault(t => t.Id == id);
+            if (ticket == null)
+            {
+                return NotFound();
+            }
+
             return View(ticket);
         }
     }

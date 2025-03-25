@@ -5,6 +5,8 @@ namespace HelpdeskApp.Models
     {
         public int Id { get; set; }
 
+        public string Username { get; set; }
+
         [Required]
         public string Title { get; set; }
 

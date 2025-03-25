@@ -23,6 +23,9 @@
                 <td>@ticket.Id</td>
                 <td>@ticket.Title</td>
                 <td>@ticket.Status</td>
+                <td>
+                    <a href="@Url.Action("Details", "Ticket", new { id = ticket.Id })" class="btn btn-info">View</a>
+                </td>
             </tr>
         }
     </tbody>
