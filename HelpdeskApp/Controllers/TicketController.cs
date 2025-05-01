@@ -2,6 +2,9 @@
 using HelpdeskApp.Models;
 using HelpdeskApp.Data;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using HelpdeskApp.ViewModels;
 
 namespace HelpdeskApp.Controllers
 {
@@ -19,6 +22,17 @@ namespace HelpdeskApp.Controllers
             return HttpContext.Session.GetString("Username") != null;
         }
 
+        private string GetLoggedInUsername()
+        {
+            return HttpContext.Session.GetString("Username");
+        }
+
+        private User GetLoggedInUser()
+        {
+            var username = GetLoggedInUsername();
+            return _context.Users.FirstOrDefault(u => u.Username == username);
+        }
+
         public IActionResult Index()
         {
             if (!IsUserLoggedIn())
@@ -26,7 +40,11 @@ namespace HelpdeskApp.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            var tickets = _context.Tickets.ToList();
+            var tickets = _context.Tickets
+                .Include(t => t.AssignedTo)
+                .Include(t => t.Comments)
+                .ToList();
+
             return View(tickets);
         }
 
@@ -41,36 +59,31 @@ namespace HelpdeskApp.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(Ticket ticket)
+        public IActionResult Create(TicketCreateViewModel model)
         {
             if (!IsUserLoggedIn())
             {
                 return RedirectToAction("Login", "Account");
             }
 
-            ticket.Username = HttpContext.Session.GetString("Username");
-
-            Console.WriteLine($"Session Username: {ticket.Username}");
-
-            if (!ModelState.IsValid) 
+            if (!ModelState.IsValid)
             {
-                Console.WriteLine("Errors:");
-
-                foreach (var key in ModelState.Keys)
-                {
-                    foreach (var error in ModelState[key].Errors)
-                    {
-                        Console.WriteLine($"Pole: {key}, Błąd: {error.ErrorMessage}");
-                    }
-                }
-
-                return View(ticket);
+                return View(model);
             }
+
+            var ticket = new Ticket
+            {
+                Title = model.Title,
+                Description = model.Description,
+                Username = GetLoggedInUsername()
+            };
 
             _context.Tickets.Add(ticket);
             _context.SaveChanges();
+
             return RedirectToAction("Index");
         }
+
 
         public IActionResult Details(int id)
         {
@@ -79,7 +92,11 @@ namespace HelpdeskApp.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            var ticket = _context.Tickets.FirstOrDefault(t => t.Id == id);
+            var ticket = _context.Tickets
+                .Include(t => t.AssignedTo)
+                .Include(t => t.Comments)
+                .FirstOrDefault(t => t.Id == id);
+
             if (ticket == null)
             {
                 return NotFound();
@@ -87,5 +104,65 @@ namespace HelpdeskApp.Controllers
 
             return View(ticket);
         }
+
+        public IActionResult AssignToMe(int id)
+        {
+            if (!IsUserLoggedIn())
+                return RedirectToAction("Login", "Account");
+
+            var ticket = _context.Tickets.FirstOrDefault(t => t.Id == id);
+            var user = GetLoggedInUser();
+
+            if (ticket == null || user == null || user.Role != UserRole.Admin)
+                return Unauthorized();
+
+            ticket.AssignedToId = user.Id;
+            ticket.Status = TicketStatus.InProgress;
+
+            _context.SaveChanges();
+            return RedirectToAction("Details", new { id });
+        }
+
+        [HttpPost]
+        public IActionResult ChangeStatus(int id, TicketStatus status)
+        {
+            if (!IsUserLoggedIn())
+                return RedirectToAction("Login", "Account");
+
+            var ticket = _context.Tickets.FirstOrDefault(t => t.Id == id);
+            var user = GetLoggedInUser();
+
+            if (ticket == null || user == null || user.Role != UserRole.Admin)
+                return Unauthorized();
+
+            ticket.Status = status;
+            _context.SaveChanges();
+
+            return RedirectToAction("Details", new { id });
+        }
+
+        [HttpPost]
+        public IActionResult AddComment(CommentViewModel model)
+        {
+            if (!IsUserLoggedIn())
+                return RedirectToAction("Login", "Account");
+
+            if (!ModelState.IsValid)
+                return RedirectToAction("Details", new { id = model.TicketId });
+
+            var comment = new Comment
+            {
+                TicketId = model.TicketId,
+                Content = model.Content,
+                Username = GetLoggedInUsername(),
+                CreatedAt = DateTime.Now
+            };
+
+            _context.Comments.Add(comment);
+            _context.SaveChanges();
+
+            return RedirectToAction("Details", new { id = model.TicketId });
+        }
+
     }
 }

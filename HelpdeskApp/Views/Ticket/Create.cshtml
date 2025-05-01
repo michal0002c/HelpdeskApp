@@ -1,23 +1,29 @@
-﻿@model HelpdeskApp.Models.Ticket
+﻿@model HelpdeskApp.Models.TicketCreateViewModel
 
 @{
-    ViewData["Title"] = "New Ticket";
+    ViewData["Title"] = "Nowe zgłoszenie";
 }
+<div class="d-flex justify-content-center align-items-center vh-100 bg-dark text-light">
+    <div class="card shadow-lg p-4" style="min-width: 600px; background-color: #2c2f33;">
+        <h2 class="mb-4 text-center">Nowe zgłoszenie</h2>
 
-<h2>New Ticket</h2>
+        <form asp-action="Create" method="post">
+            <div class="mb-3">
+                <label asp-for="Title" class="form-label">Tytuł *</label>
+                <input asp-for="Title" class="form-control bg-dark text-light border-secondary" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
 
-<form asp-action="Create" method="post">
-    <input type="hidden" asp-for="Username" value="@Context.Session.GetString("Username")" />
+            <div class="mb-3">
+                <label asp-for="Description" class="form-label">Treść</label>
+                <textarea asp-for="Description" rows="5" class="form-control bg-dark text-light border-secondary"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
 
-    <div class="form-group">
-        <label for="Title">Title</label>
-        <input asp-for="Title" class="form-control" required />
+            <div class="d-flex justify-content-between">
+                <a asp-action="Index" class="btn btn-outline-light">Anuluj i wróć</a>
+                <button type="submit" class="btn btn-success">Utwórz</button>
+            </div>
+        </form>
     </div>
-
-    <div class="form-group">
-        <label for="Description">Description</label>
-        <textarea asp-for="Description" class="form-control" required></textarea>
-    </div>
-
-    <button type="submit" class="btn btn-success">Create</button>
-</form>
+</div>

@@ -10,21 +10,20 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddAuthentication("Cookies")
     .AddCookie(options =>
     {
-        options.LoginPath = "/Account/Login";  // Œcie¿ka logowania
-        options.AccessDeniedPath = "/Account/AccessDenied";  // Œcie¿ka, gdy u¿ytkownik nie ma dostêpu
+        options.LoginPath = "/Account/Login";  
+        options.AccessDeniedPath = "/Account/AccessDenied"; 
     });
 
 builder.Services.AddAuthorization();
 
 builder.Services.AddControllersWithViews();
-// Dodaj us³ugi, takie jak MVC
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30); // Czas trwania sesji
+    options.IdleTimeout = TimeSpan.FromMinutes(180); 
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
@@ -34,7 +33,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseSession();
 
-// Skonfiguruj middleware aplikacji
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
@@ -45,7 +43,6 @@ else
     app.UseHsts();
 }
 
-// Konfiguracja routingu
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();

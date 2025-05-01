@@ -22,7 +22,7 @@ namespace HelpdeskApp.Controllers
 
         // POST: /Account/Login
         [HttpPost]
-        public IActionResult Login(UserModel model)
+        public IActionResult Login(User model)
         {
             var user = _context.Users.FirstOrDefault(u => u.Username == model.Username && u.Password == model.Password);
 

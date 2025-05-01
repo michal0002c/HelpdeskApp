@@ -2,6 +2,12 @@
 
 namespace HelpdeskApp.Models
 {
+    public enum UserRole
+    {
+        User,
+        Admin
+    }
+
     public class User
     {
         [Key]
@@ -15,5 +21,8 @@ namespace HelpdeskApp.Models
 
         [Required]
         public string Email { get; set; }
+
+        [Required]
+        public UserRole Role { get; set; } = UserRole.User;
     }
 }

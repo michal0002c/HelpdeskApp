@@ -11,3 +11,23 @@
         <a href="@Url.Action("Index", "Ticket")" class="btn btn-secondary">Back to List</a>
     </div>
 </div>
+<h4>Comments</h4>
+@foreach (var comment in Model.Comments)
+{
+    <div class="border p-2 my-2">
+        <strong>@comment.Username</strong>:
+        <p>@comment.Content</p>
+        <small>@comment.CreatedAt.ToString("g")</small>
+    </div>
+}
+
+<h4>Add Comment</h4>
+<form asp-action="AddComment" method="post">
+    <input type="hidden" name="TicketId" value="@Model.Id" />
+
+    <div class="form-group">
+        <textarea name="Content" class="form-control" rows="3" placeholder="Add your comment here..." required></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-2">Submit Comment</button>
+</form>
