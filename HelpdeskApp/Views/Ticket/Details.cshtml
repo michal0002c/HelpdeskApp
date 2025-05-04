@@ -1,33 +1,102 @@
 ﻿@model HelpdeskApp.Models.Ticket
 
-<h2>Ticket Details</h2>
-
-<div class="card">
-    <div class="card-body">
-        <h4 class="card-title">Ticket #@Model.Id</h4>
-        <p class="card-text"><strong>Title:</strong> @Model.Title</p>
-        <p class="card-text"><strong>Description:</strong> @Model.Description</p>
-        <p class="card-text"><strong>Created by:</strong> @Model.Username</p>
-        <a href="@Url.Action("Index", "Ticket")" class="btn btn-secondary">Back to List</a>
-    </div>
-</div>
-<h4>Comments</h4>
-@foreach (var comment in Model.Comments)
-{
-    <div class="border p-2 my-2">
-        <strong>@comment.Username</strong>:
-        <p>@comment.Content</p>
-        <small>@comment.CreatedAt.ToString("g")</small>
-    </div>
+@{
+    ViewData["Title"] = "Ticket Details";
 }
 
-<h4>Add Comment</h4>
-<form asp-action="AddComment" method="post">
-    <input type="hidden" name="TicketId" value="@Model.Id" />
-
-    <div class="form-group">
-        <textarea name="Content" class="form-control" rows="3" placeholder="Add your comment here..." required></textarea>
+<div class="container my-4">
+    <!-- Nagłówek -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Ticket #@Model.Id</h2>
+        <a href="@Url.Action("Index", "Ticket")" class="btn btn-outline-light">
+            <i class="fas fa-arrow-left"></i> Back to List
+        </a>
     </div>
 
-    <button type="submit" class="btn btn-primary mt-2">Submit Comment</button>
-</form>
+    <!-- Szczegóły zgłoszenia -->
+    <div class="card bg-dark text-white border-secondary mb-4 shadow-sm">
+        <div class="card-body">
+            <h4 class="card-title mb-3">@Model.Title</h4>
+            <p class="card-text"><strong>Description:</strong> @Model.Description</p>
+            <p class="card-text">
+                <strong>Status:</strong>
+                @if (Model.Status == TicketStatus.New)
+                {
+                    <span class="badge bg-warning text-dark">Open</span>
+                }
+                else if (Model.Status == TicketStatus.InProgress)
+                {
+                    <span class="badge bg-info text-dark">In progress</span>
+                }
+                else
+                {
+                    <span class="badge bg-success">Closed</span>
+                }
+            </p>
+            <p class="card-text"><strong>Created by:</strong> @Model.Username</p>
+            <p class="card-text"><strong>Created at:</strong> @Model.CreatedAt.ToString("yyyy-MM-dd HH:mm")</p>
+            <p class="card-text"><strong>Assigned to:</strong> @Model.AssignedTo?.Username 
+
+        </div>
+    </div>
+
+    <h4 class="mb-3">Comments</h4>
+    @if (Model.Comments.Any())
+    {
+        <div class="d-flex flex-column gap-2 mb-4">
+            @foreach (var comment in Model.Comments.OrderBy(c => c.CreatedAt))
+            {
+                var isUser = comment.Username == Model.Username;
+                var alignmentClass = isUser ? "justify-content-end" : "justify-content-start";
+                var bubbleClass = isUser ? "bg-primary text-white" : "bg-secondary text-white";
+
+                <div class="d-flex @alignmentClass">
+                    <div class="p-3 rounded @bubbleClass" style="max-width: 70%;">
+                        <div class="fw-bold mb-1">@comment.Username</div>
+                        <div>@comment.Content</div>
+                        <div class="text-muted small mt-1">@comment.CreatedAt.ToString("g")</div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <p class="text-muted">No comments yet.</p>
+    }
+
+
+    <h4 class="mt-5 mb-3">Add a Comment</h4>
+    <form asp-action="AddComment" method="post" class="mb-4">
+        <input type="hidden" name="TicketId" value="@Model.Id" />
+
+        <div class="mb-3">
+            <textarea name="Content" class="form-control bg-dark text-white border-secondary" rows="3" placeholder="Add your comment..." required></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-paper-plane"></i> Submit Comment
+        </button>
+    </form>
+
+    @if (Context.Session.GetString("Role") == "Admin" && Model.AssignedTo == null)
+    {
+        <form asp-action="AssignToMe" method="post" class="mb-3">
+            <input type="hidden" name="id" value="@Model.Id" />
+            <button type="submit" class="btn btn-outline-warning">
+                <i class="fas fa-user-plus"></i> Assign to me
+            </button>
+        </form>
+    }
+    @if (Context.Session.GetString("Role") == "Admin" && Model.AssignedTo?.Username == Context.Session.GetString("Username") && Model.Status != TicketStatus.Closed)
+    {
+        <form asp-action="ChangeStatus" method="post" class="mb-3">
+            <input type="hidden" name="id" value="@Model.Id" />
+            <input type="hidden" name="status" value="Closed" />
+            <button type="submit" class="btn btn-outline-success">
+                <i class="fas fa-check-circle"></i> Close Ticket
+            </button>
+        </form>
+    }
+
+</div>

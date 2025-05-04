@@ -30,6 +30,7 @@ namespace HelpdeskApp.Controllers
             {
                 HttpContext.Session.SetString("UserId", user.Id.ToString());
                 HttpContext.Session.SetString("Username", user.Username);
+                HttpContext.Session.SetString("Role", user.Role.ToString()); 
 
                 return RedirectToAction("Index", "Ticket"); 
             }

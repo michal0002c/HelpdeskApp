@@ -123,6 +123,12 @@ namespace HelpdeskApp.Controllers
             return RedirectToAction("Details", new { id });
         }
 
+        private bool IsAdmin()
+        {
+            var user = GetLoggedInUser();
+            return user != null && user.Role == UserRole.Admin;
+        }
+
         [HttpPost]
         public IActionResult ChangeStatus(int id, TicketStatus status)
         {
