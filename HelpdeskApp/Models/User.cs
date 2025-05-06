@@ -24,5 +24,8 @@ namespace HelpdeskApp.Models
 
         [Required]
         public UserRole Role { get; set; } = UserRole.User;
+
+        public string? ProfileImagePath { get; set; }
+
     }
 }

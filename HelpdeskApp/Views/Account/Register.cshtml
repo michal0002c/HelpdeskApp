@@ -1,22 +1,55 @@
-﻿@model User
+﻿@model HelpdeskApp.ViewModels.RegisterViewModel
 
-<h2>Register form</h2>
+@{
+    ViewData["Title"] = "Register";
+    Layout = "_Layout";
+}
 
-<form asp-action="Register" method="post">
-    <div class="form-group">
-        <label for="Username">Username</label>
-        <input type="text" class="form-control" id="Username" name="Username" required />
+<div class="container mt-5" style="max-width: 400px;">
+    <div class="text-center mb-3">
+        <img src="~/images/logo.png" alt="logo" class="img-fluid mb-2" style="max-height: 80px;" />
+        <p class="text-muted">Create your HelpDesk account</p>
     </div>
 
-    <div class="form-group">
-        <label for="Email">E-mail</label>
-        <input type="email" class="form-control" id="Email" name="Email" required />
-    </div>
+    <form asp-action="Register" enctype="multipart/form-data" method="post" class="bg-white text-dark p-4 rounded shadow-sm">
+        <div class="form-group mb-3">
+            <label asp-for="Username"></label>
+            <input asp-for="Username" class="form-control" />
+            <span asp-validation-for="Username" class="text-danger small"></span>
+        </div>
 
-    <div class="form-group">
-        <label for="Password">Password</label>
-        <input type="password" class="form-control" id="Password" name="Password" required />
-    </div>
+        <div class="form-group mb-3">
+            <label asp-for="Email"></label>
+            <input asp-for="Email" class="form-control" />
+            <span asp-validation-for="Email" class="text-danger small"></span>
+        </div>
 
-    <button type="submit" class="btn btn-primary">Register now</button>
-</form>
+        <div class="form-group mb-3">
+            <label asp-for="Password"></label>
+            <input asp-for="Password" class="form-control" />
+            <span asp-validation-for="Password" class="text-danger small"></span>
+        </div>
+
+        <div class="form-group mb-3">
+            <label asp-for="ConfirmPassword"></label>
+            <input asp-for="ConfirmPassword" class="form-control" />
+            <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+        </div>
+
+        <div class="form-group mb-4">
+            <label asp-for="ProfileImage">Profile image (optional)</label>
+            <input asp-for="ProfileImage" type="file" accept=".jpg,.jpeg,.png" class="form-control" />
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100 mb-2">Register</button>
+    </form>
+
+    <div class="text-center mt-3">
+        <span>Already have an account?</span>
+        <a href="/Account/Login">Log in</a>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

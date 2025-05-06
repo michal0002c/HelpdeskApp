@@ -1,38 +1,44 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using HelpdeskApp.Models;
 using HelpdeskApp.Data;
+using HelpdeskApp.ViewModels;
+using Microsoft.AspNetCore.Http;
 using System.Linq;
+using HelpdeskApp.Helpers;
 
 namespace HelpdeskApp.Controllers
 {
     public class AccountController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly IWebHostEnvironment _environment;
 
-        public AccountController(AppDbContext context)
+        public AccountController(AppDbContext context, IWebHostEnvironment environment)
         {
             _context = context;
+            _environment = environment;
         }
 
-        // GET: /Account/Login
         public IActionResult Login()
         {
             return View();
         }
 
-        // POST: /Account/Login
         [HttpPost]
         public IActionResult Login(User model)
         {
-            var user = _context.Users.FirstOrDefault(u => u.Username == model.Username && u.Password == model.Password);
+            var hashedPassword = PasswordHasher.Hash(model.Password);
+
+            var user = _context.Users.FirstOrDefault(u =>
+                u.Username == model.Username && u.Password == hashedPassword);
 
             if (user != null)
             {
                 HttpContext.Session.SetString("UserId", user.Id.ToString());
                 HttpContext.Session.SetString("Username", user.Username);
-                HttpContext.Session.SetString("Role", user.Role.ToString()); 
+                HttpContext.Session.SetString("Role", user.Role.ToString());
 
-                return RedirectToAction("Index", "Ticket"); 
+                return RedirectToAction("Index", "Ticket");
             }
             else
             {
@@ -41,24 +47,55 @@ namespace HelpdeskApp.Controllers
             }
         }
 
-
-        // GET: /Account/Register
         [HttpGet]
         public IActionResult Register()
         {
             return View();
         }
 
-        // POST: /Account/Register
         [HttpPost]
-        public IActionResult Register(User user)
+        public IActionResult Register(RegisterViewModel model)
         {
             if (ModelState.IsValid)
             {
-                if (_context.Users.Any(u => u.Username == user.Username))
+                var existingUser = _context.Users.FirstOrDefault(u =>
+                    u.Username == model.Username || u.Email == model.Email);
+
+                if (existingUser != null)
                 {
-                    ModelState.AddModelError("Username", "Użytkownik o tej nazwie już istnieje.");
-                    return View(user);
+                    if (existingUser.Username == model.Username)
+                    {
+                        ModelState.AddModelError(nameof(model.Username), "Username already exists.");
+                    }
+
+                    if (existingUser.Email == model.Email)
+                    {
+                        ModelState.AddModelError(nameof(model.Email), "Email is already in use.");
+                    }
+
+                    return View(model); 
+                }
+
+                var hashedPassword = PasswordHasher.Hash(model.Password);
+
+                var user = new User
+                {
+                    Username = model.Username,
+                    Email = model.Email,
+                    Password = hashedPassword,
+                    Role = UserRole.User
+                };
+
+                if (model.ProfileImage != null && model.ProfileImage.Length > 0)
+                {
+                    var fileName = Path.GetFileName(model.ProfileImage.FileName);
+                    var filePath = Path.Combine("wwwroot/images", fileName);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        model.ProfileImage.CopyTo(stream);
+                    }
+
+                    user.ProfileImagePath = "/images/" + fileName;
                 }
 
                 _context.Users.Add(user);
@@ -67,14 +104,14 @@ namespace HelpdeskApp.Controllers
                 return RedirectToAction("Login");
             }
 
-            return View(user);
+            return View(model);
         }
+
 
         public IActionResult Logout()
         {
             HttpContext.Session.Clear();
-            return RedirectToAction("Login", "Account");
+            return RedirectToAction("Login");
         }
-
     }
 }
