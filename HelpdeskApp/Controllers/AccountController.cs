@@ -107,6 +107,73 @@ namespace HelpdeskApp.Controllers
             return View(model);
         }
 
+        [HttpGet]
+        public IActionResult Edit()
+        {
+            var userId = HttpContext.Session.GetString("UserId");
+            if (string.IsNullOrEmpty(userId)) return RedirectToAction("Login");
+
+            var user = _context.Users.FirstOrDefault(u => u.Id.ToString() == userId);
+            if (user == null) return NotFound();
+
+            var model = new EditProfileViewModel
+            {
+                Username = user.Username,
+                Email = user.Email,
+                CurrentImagePath = user.ProfileImagePath
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        public IActionResult Edit(EditProfileViewModel model)
+        {
+            var userId = HttpContext.Session.GetString("UserId");
+            if (string.IsNullOrEmpty(userId)) return RedirectToAction("Login");
+
+            var user = _context.Users.FirstOrDefault(u => u.Id.ToString() == userId);
+            if (user == null) return NotFound();
+
+            if (!string.IsNullOrEmpty(model.NewPassword))
+            {
+                user.Password = PasswordHasher.Hash(model.NewPassword);
+            }
+
+            if (ModelState.IsValid)
+            {
+                user.Username = model.Username;
+                user.Email = model.Email;
+
+                if (model.NewProfileImage != null && model.NewProfileImage.Length > 0)
+                {
+                    var fileExt = Path.GetExtension(model.NewProfileImage.FileName).ToLower();
+                    if (fileExt == ".jpg" || fileExt == ".png")
+                    {
+                        var fileName = Guid.NewGuid().ToString() + fileExt;
+                        var filePath = Path.Combine("wwwroot/images", fileName);
+
+                        using (var stream = new FileStream(filePath, FileMode.Create))
+                        {
+                            model.NewProfileImage.CopyTo(stream);
+                        }
+
+                        user.ProfileImagePath = "/images/" + fileName;
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("NewProfileImage", "Only JPG and PNG files are allowed.");
+                        return View(model);
+                    }
+                }
+
+                _context.SaveChanges();
+                HttpContext.Session.SetString("Username", user.Username);
+                return RedirectToAction("Edit");
+            }
+
+            return View(model);
+        }
 
         public IActionResult Logout()
         {
