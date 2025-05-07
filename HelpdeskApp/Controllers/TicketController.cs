@@ -45,7 +45,56 @@ namespace HelpdeskApp.Controllers
                 .Include(t => t.Comments)
                 .ToList();
 
-            return View(tickets);
+            var user = GetLoggedInUser();
+            int myCount;
+
+            if (user.Role == UserRole.Admin)
+            {
+                myCount = _context.Tickets.Count(t => t.AssignedToId == user.Id);
+            }
+            else
+            {
+                myCount = _context.Tickets.Count(t => t.Username == user.Username);
+            }
+
+            ViewBag.MyTicketsCount = myCount;
+            ViewBag.AllTicketsCount = tickets.Count;
+
+            return View("TicketList", tickets);
+        }
+
+        public IActionResult MyTickets()
+        {
+            if (!IsUserLoggedIn())
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var user = GetLoggedInUser();
+
+            List<Ticket> tickets;
+
+            if (user.Role == UserRole.Admin)
+            {
+                tickets = _context.Tickets
+                    .Include(t => t.AssignedTo)
+                    .Include(t => t.Comments)
+                    .Where(t => t.AssignedToId == user.Id)
+                    .ToList();
+            }
+            else
+            {
+                tickets = _context.Tickets
+                    .Include(t => t.AssignedTo)
+                    .Include(t => t.Comments)
+                    .Where(t => t.Username == user.Username)
+                    .ToList();
+            }
+
+            ViewBag.MyTicketsCount = tickets.Count;
+            ViewBag.AllTicketsCount = _context.Tickets.Count();
+
+            return View("TicketList", tickets);
         }
 
         public IActionResult Create()

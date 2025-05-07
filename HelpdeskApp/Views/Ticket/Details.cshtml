@@ -5,7 +5,6 @@
 }
 
 <div class="container my-4">
-    <!-- Nagłówek -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Ticket #@Model.Id</h2>
         <a href="@Url.Action("Index", "Ticket")" class="btn btn-outline-light">
@@ -13,7 +12,6 @@
         </a>
     </div>
 
-    <!-- Szczegóły zgłoszenia -->
     <div class="card bg-dark text-white border-secondary mb-4 shadow-sm">
         <div class="card-body">
             <h4 class="card-title mb-3">@Model.Title</h4>

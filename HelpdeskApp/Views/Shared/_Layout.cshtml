@@ -29,12 +29,17 @@
 
             <ul class="nav nav-pills flex-column mb-auto text-center">
                 <li class="nav-item">
-                    <a href="#" class="nav-link text-white" title="Dashboard"><i class="fas fa-home"></i></a>
+                    <a asp-controller="Ticket" asp-action="Index" class="nav-link text-white" title="Dashboard">
+                        <i class="fas fa-home"></i>
+                    </a>
                 </li>
                 <li>
-                    <a href="#" class="nav-link text-white" title="Tickets"><i class="fas fa-ticket-alt"></i></a>
+                    <a asp-controller="Ticket" asp-action="Index" class="nav-link text-white" title="Tickets">
+                        <i class="fas fa-ticket-alt"></i>
+                    </a>
                 </li>
             </ul>
+
 
             <div class="mt-auto text-center">
                 <a asp-controller="Ticket" asp-action="Create" title="Add Ticket" class="text-white d-block mb-3">
