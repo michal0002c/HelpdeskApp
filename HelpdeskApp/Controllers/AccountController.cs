@@ -25,8 +25,13 @@ namespace HelpdeskApp.Controllers
         }
 
         [HttpPost]
-        public IActionResult Login(User model)
+        public IActionResult Login(LoginViewModel model)
         {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
             var hashedPassword = PasswordHasher.Hash(model.Password);
 
             var user = _context.Users.FirstOrDefault(u =>
@@ -43,7 +48,7 @@ namespace HelpdeskApp.Controllers
             else
             {
                 ViewBag.Error = "Incorrect username or password.";
-                return View();
+                return View(model);
             }
         }
 
