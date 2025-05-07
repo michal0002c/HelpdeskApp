@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using HelpdeskApp.ViewModels;
 
+//namespace
 namespace HelpdeskApp.Controllers
 {
     public class TicketController : Controller
