@@ -18,6 +18,13 @@ Helpdesk System is a web-based application built with ASP.NET that allows users 
 - Entity Framework
 - Bootstrap
 
+## Screenshots
+![image](https://github.com/user-attachments/assets/1ac077cd-7d6e-48ef-8ad8-8ad4ddfb6021)
+![image](https://github.com/user-attachments/assets/a4b449d4-8faa-47d7-911a-e68ab77f3e86)
+![image](https://github.com/user-attachments/assets/5e527877-0264-4a19-ad80-cebff9a2b5ae)
+![image](https://github.com/user-attachments/assets/53169fd5-71ba-42bd-bf43-53a390728def)
+![image](https://github.com/user-attachments/assets/6fda6112-4d4d-476b-be00-7cc05601c534)
+
 ## Installation
 1. Clone the repository:
    ```sh
